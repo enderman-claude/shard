@@ -15,7 +15,6 @@ jobs:
         run: make test
       - name: Convert the sample with shardelf and inspect the ELF
         run: |
-          make build/shardelf build/sample.shard
           ./build/shardelf build/sample.shard build/ci-sample.so
           readelf -h build/ci-sample.so
           readelf -l build/ci-sample.so
