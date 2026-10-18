@@ -134,7 +134,7 @@ static int apply_relocs(const struct elf_image *img, uint8_t *dst, size_t dst_le
         uint64_t sym = r_info >> 32;
         uint64_t value;
         if (type == R_X86_64_RELATIVE && sym == 0) {
-            value = load_base + addend;
+            value = load_base + (addend - min); /* load_base is the address of vaddr min */
         } else if (type == R_X86_64_64 && sym != 0) {
             /* Defined symbol in this image only: st_shndx at +6 must be non-zero. */
             if (symtab == 0 || symtab - min > dst_len || (sym + 1) * 24 > dst_len - (symtab - min)) {
@@ -144,7 +144,7 @@ static int apply_relocs(const struct elf_image *img, uint8_t *dst, size_t dst_le
             if (le_read16(se + 6) == 0) {
                 return ELF_ERR_RELOC; /* undefined symbol: no dynamic linking */
             }
-            value = load_base + le_read64(se + 8) + addend;
+            value = load_base + (le_read64(se + 8) - min) + addend;
         } else {
             return ELF_ERR_RELOC;
         }
