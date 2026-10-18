@@ -26,8 +26,14 @@ build/needs_lib.so: tests/fixture/needs_lib.c
 build/test_all: tests/test_all.c build/libshard.a
 	$(CC) -std=c11 -Wall -Wextra -Werror -O2 -Iinclude -o $@ $< build/libshard.a
 
-test: build/test_all build/elf_fixture.so build/needs_lib.so
-	./build/test_all build/elf_fixture.so
+build/shardelf: tools/shardelf/shardelf.c build/libshard.a
+	$(CC) -std=c11 -Wall -Wextra -Werror -O2 -Iinclude -o $@ $< build/libshard.a
+
+test: build/test_all build/elf_fixture.so build/needs_lib.so build/shardelf
+	./build/test_all build/elf_fixture.so build/sample.shard
+	./build/shardelf build/sample.shard build/sample.so
+	readelf -h build/sample.so | grep -q 'Type:.*DYN'
+	readelf -d build/sample.so | grep -q RELA
 
 clean:
 	rm -rf build

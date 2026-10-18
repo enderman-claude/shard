@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "shard/shard_open.h"
 #include "shard/shard_load.h"
 #include "shard/shard_link.h"
 #include "elf/elf_open.h"
 #include "elf/elf_load.h"
+#include "convert/shard_to_elf.h"
+#include "shard/shard_load.h"
 
 static int failures;
 #define CHECK(cond, name) do { if (cond) { printf("ok   %s\n", name); } else { printf("FAIL %s\n", name); failures++; } } while (0)
@@ -166,9 +169,51 @@ static void test_elf(const char *fixture)
     }
 }
 
+/* SHARD -> ELF -> loader must produce the same bytes as the SHARD loader. */
+static void test_shardelf(void)
+{
+    uint8_t img_bytes[256];
+    size_t n = build_good(img_bytes);
+    struct shard_image si;
+    CHECK(shard_open(img_bytes, n, &si) == SHARD_OK, "conv: source SHARD opens");
+
+    size_t cap = 0;
+    CHECK(shard_to_elf_size(&si, &cap) == SHARD_OK && cap > 64, "conv: size computed");
+    static uint8_t elf[4096];
+    size_t written = 0;
+    CHECK(shard_to_elf(&si, elf, sizeof elf, &written) == SHARD_OK && written == cap, "conv: ELF written");
+    CHECK(shard_to_elf(&si, elf, 16, &written) != SHARD_OK, "conv: small buffer rejected");
+
+    struct elf_image ei;
+    CHECK(elf_open(elf, written, &ei) == 0, "conv: output opens as ELF");
+    CHECK(ei.entry == si.entry, "conv: entry preserved");
+
+    uint64_t base = 0x400000;
+    uint8_t a[64], b[64];
+    static uint8_t b_span[1024];
+    uint64_t entry_a = 0, entry_b = 0, span = 0;
+    CHECK(shard_load(&si, a, sizeof a, base, &entry_a) == SHARD_OK, "conv: SHARD loads");
+    CHECK(elf_load(&ei, b_span, sizeof b_span, base, &entry_b, &span) == 0, "conv: ELF loads");
+    memcpy(b, b_span, sizeof b);
+    CHECK(entry_a == entry_b, "conv: same entry address");
+    CHECK(memcmp(a, b, sizeof a) == 0, "conv: same memory image for SHARD range");
+}
+
 int main(int argc, char **argv)
 {
     test_shard();
+    test_shardelf();
+    if (argc > 2) {
+        /* write the good SHARD fixture so the CI can run shardelf on it */
+        uint8_t fixture[256];
+        size_t fn = build_good(fixture);
+        FILE *f = fopen(argv[2], "wb");
+        if (!f || fwrite(fixture, 1, fn, f) != fn) {
+            printf("FAIL shard: cannot write sample %s\n", argv[2]);
+            failures++;
+        }
+        if (f) fclose(f);
+    }
     if (argc > 1) {
         test_elf(argv[1]);
     } else {

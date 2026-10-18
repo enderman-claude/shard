@@ -14,3 +14,10 @@
 - shard_open rejects any header flag bit (v2 feature); v1 reserves flags = 0.
 - ELF loader rejects DT_NEEDED. Tested against a fixture linked with libm.
 - make test: all checks pass.
+
+## Session 3
+- Added SHARELF: src/convert/shard_to_elf turns a validated SHARD image into a plain ELF64 ET_DYN.
+  Layout: zero-size anchor at vaddr 0, one PT_LOAD per section, a RW PT_LOAD for the dynamic table and RELA records, and PT_DYNAMIC.
+- tools/shardelf wraps it as a command-line tool.
+- The round-trip test (SHARD -> ELF -> loader) checks entry address and memory bytes against the SHARD loader.
+- CI workflow runs make test and converts the sample with readelf inspection.

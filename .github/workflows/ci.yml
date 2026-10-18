@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install toolchain
+        run: sudo apt-get update && sudo apt-get install -y gcc binutils make
+      - name: Build and test (SHARD, ELF loader, SHARD to ELF round trip)
+        run: make test
+      - name: Convert the sample with shardelf and inspect the ELF
+        run: |
+          make build/shardelf build/sample.shard
+          ./build/shardelf build/sample.shard build/ci-sample.so
+          readelf -h build/ci-sample.so
+          readelf -l build/ci-sample.so
+          readelf -d build/ci-sample.so
+      - name: Upload converted sample
+        uses: actions/upload-artifact@v4
+        with:
+          name: sharelf-sample
+          path: build/ci-sample.so
