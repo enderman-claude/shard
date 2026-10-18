@@ -16,6 +16,7 @@ One directory per unit, the same rule as tessera:
 Subsystems: `common` (byte reads and writes), `shard` (format), `elf` (ELF subset), `convert` (SHARD to ELF).
 
 ## Tools
+- `elfpack`: packs a plain ELF64 ET_DYN x86_64 file into SHARD (`elfpack in.elf out.shard`). This is how programs get into SHARD: write C, compile with gcc (static-pie), then pack. There is no SHARD compiler.
 - `shardelf`: converts a SHARD image to a plain ELF64 ET_DYN file (`shardelf in.shard out.so`).
   The round trip SHARD -> ELF -> loader is tested in CI, so the two loaders are checked against each other.
 
