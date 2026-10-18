@@ -8,3 +8,9 @@
   defined symbol, not RELATIVE with symbol 0. Added support for that case (symbol must
   be defined in the image). Undefined symbols are rejected.
 - make test: 23 checks pass, including a real gcc-built ELF fixture.
+
+## Session 2
+- Added dynamic-linking stubs (docs/spec/dynlink.md, include/shard/shard_link.h). They return SHARD_ERR_UNSUPPORTED.
+- shard_open rejects any header flag bit (v2 feature); v1 reserves flags = 0.
+- ELF loader rejects DT_NEEDED. Tested against a fixture linked with libm.
+- make test: all checks pass.

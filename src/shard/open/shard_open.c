@@ -24,6 +24,10 @@ int shard_open(const uint8_t *data, size_t len, struct shard_image *img)
     img->data = data;
     img->len = len;
     img->flags = le_read32(data + 8);
+    if (img->flags != 0) {
+        /* Any flag is a v2 feature (e.g. imports). v1 loaders must not ignore it. */
+        return SHARD_ERR_UNSUPPORTED;
+    }
     img->entry = le_read64(data + 12);
     img->image_size = le_read64(data + 20);
     img->sec_count = le_read32(data + 28);

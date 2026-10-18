@@ -20,6 +20,9 @@
 
 #define SHARD_REL_RELATIVE 1
 
+/* Header flags. v1 accepts none. HAS_IMPORTS is reserved for v2. */
+#define SHARD_FLAG_HAS_IMPORTS 1u
+
 /* Status codes. 0 is success; everything else is an error. */
 enum shard_status {
     SHARD_OK = 0,
@@ -32,6 +35,7 @@ enum shard_status {
     SHARD_ERR_RELOC = -7,
     SHARD_ERR_DEST = -8,
     SHARD_ERR_INDEX = -9,
+    SHARD_ERR_UNSUPPORTED = -10,
 };
 
 #endif

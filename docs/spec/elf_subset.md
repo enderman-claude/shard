@@ -12,6 +12,7 @@ Accepted:
   (`st_shndx` non-zero): value is `base + st_value + addend`. Found through `DT_SYMTAB`.
 
 Rejected with an error:
+- Any `DT_NEEDED` entry (the image depends on a shared library).
 - `ET_EXEC` (fixed addresses are not supported).
 - Any other relocation type, and any symbol that is undefined (no dynamic linking).
 - Segments that fall outside the file.

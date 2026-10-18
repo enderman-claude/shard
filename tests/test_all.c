@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "shard/shard_open.h"
 #include "shard/shard_load.h"
+#include "shard/shard_link.h"
 #include "elf/elf_open.h"
 #include "elf/elf_load.h"
 
@@ -72,6 +73,14 @@ static void test_shard(void)
     CHECK(dst[4] == 0 && dst[5] == 0, "shard: gap after code is zeroed");
 
     uint8_t bad[256];
+    memcpy(bad, img, n);
+    put32(bad + 8, SHARD_FLAG_HAS_IMPORTS);
+    CHECK(shard_open(bad, n, &si) == SHARD_ERR_UNSUPPORTED, "shard: v2 import flag rejected");
+    uint32_t icount = 0;
+    if (shard_open(img, n, &si) != SHARD_OK) { failures++; }
+    CHECK(shard_import_count(&si, &icount) == SHARD_ERR_UNSUPPORTED, "shard: import count is a stub");
+    CHECK(shard_link(&si, dst, sizeof dst, base, 0, 0) == SHARD_ERR_UNSUPPORTED, "shard: link is a stub");
+
     memcpy(bad, img, n);
     bad[0] = 'X';
     CHECK(shard_open(bad, n, &si) == SHARD_ERR_MAGIC, "shard: bad magic rejected");
@@ -144,6 +153,17 @@ static void test_elf(const char *fixture)
     bad[4] = 1;
     CHECK(elf_open(bad, n, &ei) != 0, "elf: 32-bit class rejected");
     CHECK(elf_open(file, 32, &ei) != 0, "elf: short file rejected");
+
+    static uint8_t dep[65536];
+    size_t dn = 0;
+    if (read_file("build/needs_lib.so", dep, sizeof dep, &dn) && elf_open(dep, dn, &ei) == 0) {
+        static uint8_t dd[65536];
+        uint64_t e2 = 0, s2 = 0;
+        CHECK(elf_load(&ei, dd, sizeof dd, 0x700000, &e2, &s2) != 0, "elf: DT_NEEDED library rejected");
+    } else {
+        printf("FAIL elf: needs_lib fixture missing\n");
+        failures++;
+    }
 }
 
 int main(int argc, char **argv)

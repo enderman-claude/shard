@@ -8,6 +8,8 @@
 #define DT_RELASZ 8
 #define DT_RELAENT 9
 #define DT_SYMTAB 6
+#define DT_NEEDED 1
+#define ELF_ERR_NEEDED -10
 #define R_X86_64_64 1
 #define R_X86_64_RELATIVE 8
 #define ELF_ERR_RANGE -6
@@ -108,6 +110,7 @@ static int apply_relocs(const struct elf_image *img, uint8_t *dst, size_t dst_le
         uint64_t tag = le_read64(e);
         uint64_t val = le_read64(e + 8);
         if (tag == DT_NULL) break;
+        if (tag == DT_NEEDED) return ELF_ERR_NEEDED; /* shared library dependency: no dynamic linking */
         if (tag == DT_RELA) rela = val;
         if (tag == DT_RELASZ) relasz = val;
         if (tag == DT_RELAENT) relaent = val;
