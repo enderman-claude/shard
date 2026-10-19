@@ -15,6 +15,11 @@ jobs:
         run: make test
       - name: Mutation test under ASan and UBSan
         run: make fuzz
+      - name: Run a SHARD image converted to ELF natively (must exit 42)
+        run: |
+          ./build/shardelf tests/fixture/exit42.shard build/exit42.so
+          chmod +x build/exit42.so
+          ./build/exit42.so; test $? -eq 42
       - name: Convert the sample with shardelf and inspect the ELF
         run: |
           ./build/shardelf build/sample.shard build/ci-sample.so

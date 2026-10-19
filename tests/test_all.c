@@ -179,7 +179,7 @@ static void test_shardelf(void)
 
     size_t cap = 0;
     CHECK(shard_to_elf_size(&si, &cap) == SHARD_OK && cap > 64, "conv: size computed");
-    static uint8_t elf[4096];
+    static uint8_t elf[16384];
     size_t written = 0;
     CHECK(shard_to_elf(&si, elf, sizeof elf, &written) == SHARD_OK && written == cap, "conv: ELF written");
     CHECK(shard_to_elf(&si, elf, 16, &written) != SHARD_OK, "conv: small buffer rejected");
@@ -190,7 +190,7 @@ static void test_shardelf(void)
 
     uint64_t base = 0x400000;
     uint8_t a[64], b[64];
-    static uint8_t b_span[1024];
+    static uint8_t b_span[16384];
     uint64_t entry_a = 0, entry_b = 0, span = 0;
     CHECK(shard_load(&si, a, sizeof a, base, &entry_a) == SHARD_OK, "conv: SHARD loads");
     CHECK(elf_load(&ei, b_span, sizeof b_span, base, &entry_b, &span) == 0, "conv: ELF loads");

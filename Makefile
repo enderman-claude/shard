@@ -35,6 +35,9 @@ build/shardelf: tools/shardelf/shardelf.c build/libshard.a
 test: build/test_all build/elf_fixture.so build/needs_lib.so build/shardelf
 	./build/test_all build/elf_fixture.so build/sample.shard
 	./build/shardelf build/sample.shard build/sample.so
+	./build/shardelf tests/fixture/exit42.shard build/exit42.so
+	chmod +x build/exit42.so
+	./build/exit42.so; test $$? -eq 42
 	readelf -h build/sample.so | grep -q 'Type:.*DYN'
 	readelf -d build/sample.so | grep -q RELA
 

@@ -24,3 +24,8 @@
 
 ## Session 4
 - Added tests/test_fuzz.c and `make fuzz`: 20000 mutated SHARD and ELF images under ASan and UBSan. The readers and loaders reject bad input and never write past the destination. Added to CI.
+
+## Session 5
+- Fixed shard_to_elf so its output runs on Linux: file offsets are congruent to vaddr mod 4096, the dynamic table gets its own page, shared pages take the union of permissions, and the zero-size anchor is added only when needed. Found by running a SHARD image that exits 42: the first converter output segfaulted.
+- Added tests/fixture/exit42.shard. make test and CI now convert it and check it exits 42.
+- Fuzz test still clean.

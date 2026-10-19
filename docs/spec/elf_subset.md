@@ -19,3 +19,14 @@ Rejected with an error:
 
 The loader places the image at a chosen base. Segments are laid out at their
 `p_vaddr` relative to the lowest `p_vaddr`.
+
+## Converter output (SHARDELF) and Linux
+The converter's output is Linux-runnable: a SHARD image with no relocations converts to an
+ET_DYN that the kernel can execute. Layout rules that make this work:
+- Each PT_LOAD's file offset is congruent to its virtual address modulo 4096.
+- The dynamic table has its own page after the image.
+- Segments that share a page take the union of their permissions, since Linux maps whole pages.
+  Within a shared page the SHARD permissions are therefore weaker than declared.
+- A zero-size PT_LOAD at vaddr 0 is added only when no section starts at 0.
+Relocations are applied by the loader, not by the kernel, so Linux runs an image with
+relocations only if it applies them itself. The shard tests check a relocation-free image.
