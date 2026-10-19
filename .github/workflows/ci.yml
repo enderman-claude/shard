@@ -13,6 +13,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y gcc binutils make
       - name: Build and test (SHARD, ELF loader, SHARD to ELF round trip)
         run: make test
+      - name: Mutation test under ASan and UBSan
+        run: make fuzz
       - name: Convert the sample with shardelf and inspect the ELF
         run: |
           ./build/shardelf build/sample.shard build/ci-sample.so

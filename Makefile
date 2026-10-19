@@ -42,3 +42,13 @@ clean:
 	rm -rf build
 
 .PHONY: all test clean
+
+# Mutation test under AddressSanitizer and UBSan. Corrupts valid images and checks that the
+# readers and loaders stay in bounds.
+build/test_fuzz: tests/test_fuzz.c build/libshard.a
+	$(CC) -std=c11 -O1 -g -fsanitize=address,undefined -fno-sanitize-recover=all -Iinclude -o $@ $< build/libshard.a
+
+fuzz: build/test_fuzz build/elf_fixture.so build/sample.shard
+	./build/test_fuzz build/elf_fixture.so build/sample.shard 20000
+
+.PHONY: fuzz

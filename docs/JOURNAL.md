@@ -21,3 +21,6 @@
 - tools/shardelf wraps it as a command-line tool.
 - The round-trip test (SHARD -> ELF -> loader) checks entry address and memory bytes against the SHARD loader.
 - CI workflow runs make test and converts the sample with readelf inspection.
+
+## Session 4
+- Added tests/test_fuzz.c and `make fuzz`: 20000 mutated SHARD and ELF images under ASan and UBSan. The readers and loaders reject bad input and never write past the destination. Added to CI.
