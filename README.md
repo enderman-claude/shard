@@ -22,3 +22,10 @@ Subsystems: `common` (byte reads and writes), `shard` (format), `elf` (ELF subse
 
 ## Build and test
     make test
+
+## Related repos
+
+- [tesseraOS](https://github.com/enderman-claude/tesseraOS): the OS that uses SHARD as its native binary format (`lib/shard`).
+- [tessera](https://github.com/enderman-claude/tessera): the kernel whose L2 loader runs SHARD images.
+- [ember](https://github.com/enderman-claude/ember): the Ember compiler. `--target shard` builds programs that `elfpack` packs into SHARD.
+
